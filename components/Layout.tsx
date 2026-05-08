@@ -7,7 +7,7 @@ import { getCurrentUser } from '../mockService';
 const Logo = () => (
   <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-emerald-800 p-4 border-b border-gray-100">
     <svg className="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
     </svg>
     <span>TripWise<span className="text-emerald-500">PK</span></span>
   </div>
@@ -22,14 +22,13 @@ interface NavLinkProps {
 }
 
 const NavLink: React.FC<NavLinkProps> = ({ to, children, active, onClick, icon }) => (
-  <Link 
-    to={to} 
+  <Link
+    to={to}
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-colors text-sm font-medium ${
-      active 
-        ? 'bg-emerald-100 text-emerald-800' 
+    className={`flex items-center gap-3 px-4 py-3 mx-2 rounded-lg transition-colors text-sm font-medium ${active
+        ? 'bg-emerald-100 text-emerald-800'
         : 'text-gray-600 hover:bg-gray-50 hover:text-emerald-600'
-    }`}
+      }`}
   >
     {icon && <span className="text-lg">{icon}</span>}
     {children}
@@ -62,21 +61,21 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 z-30">
+      <aside className=" md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 z-30">
         <Logo />
         <nav className="flex-1 overflow-y-auto py-4 space-y-1 scrollbar-thin">
           {links.map(l => (
-            <NavLink 
-              key={l.path} 
-              to={l.path} 
-              active={location.pathname === l.path} 
+            <NavLink
+              key={l.path}
+              to={l.path}
+              active={location.pathname === l.path}
               icon={l.icon}
             >
               {l.label}
             </NavLink>
           ))}
         </nav>
-        
+
         {/* User Profile Section in Sidebar */}
         <div className="p-4 border-t border-gray-100">
           {user ? (
@@ -90,9 +89,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               </div>
             </div>
           ) : (
-             <Link to="/auth" className="block w-full text-center py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 text-sm font-bold transition-colors">
-               Sign In / Join
-             </Link>
+            <Link to="/auth" className="block w-full text-center py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 text-sm font-bold transition-colors">
+              Sign In / Join
+            </Link>
           )}
         </div>
       </aside>
@@ -100,10 +99,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       {/* Mobile Header & Drawer */}
       <div className="md:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 h-16 flex items-center justify-between px-4">
         <Link to="/" className="font-bold text-emerald-800 flex items-center gap-2">
-           <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <svg className="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
           </svg>
-           TripWisePK
+          TripWisePK
         </Link>
         <button onClick={() => setIsMobileOpen(!isMobileOpen)} className="p-2 text-gray-600">
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -120,7 +119,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       <AnimatePresence>
         {isMobileOpen && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
@@ -137,10 +136,10 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
               <Logo />
               <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
                 {links.map(l => (
-                  <NavLink 
-                    key={l.path} 
-                    to={l.path} 
-                    active={location.pathname === l.path} 
+                  <NavLink
+                    key={l.path}
+                    to={l.path}
+                    active={location.pathname === l.path}
                     onClick={() => setIsMobileOpen(false)}
                     icon={l.icon}
                   >
@@ -149,9 +148,9 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 ))}
               </nav>
               <div className="p-4 border-t">
-                  <Link to="/auth" onClick={() => setIsMobileOpen(false)} className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium">
-                    {user ? 'My Profile' : 'Sign In'}
-                  </Link>
+                <Link to="/auth" onClick={() => setIsMobileOpen(false)} className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium">
+                  {user ? 'My Profile' : 'Sign In'}
+                </Link>
               </div>
             </motion.div>
           </>

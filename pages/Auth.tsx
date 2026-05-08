@@ -29,8 +29,8 @@ export const Auth = () => {
         await signup(name, email);
       }
       navigate('/admin'); // Redirect to Admin or Dashboard
-    } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Authentication failed');
     } finally {
       setLoading(false);
     }
@@ -98,7 +98,7 @@ export const Auth = () => {
                 type="text" 
                 required 
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                 placeholder="e.g. Ali Khan"
               />
@@ -111,7 +111,7 @@ export const Auth = () => {
               type="email" 
               required 
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
               placeholder="you@example.com"
             />
@@ -123,7 +123,7 @@ export const Auth = () => {
                type="password" 
                required 
                value={password}
-               onChange={(e) => setPassword(e.target.value)}
+               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none"
                placeholder="••••••••"
              />
@@ -135,7 +135,7 @@ export const Auth = () => {
                     type="checkbox" 
                     id="adminCheck" 
                     checked={isAdminLogin} 
-                    onChange={(e) => setIsAdminLogin(e.target.checked)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setIsAdminLogin(e.target.checked)}
                     className="rounded text-emerald-600 focus:ring-emerald-500"
                  />
                  <label htmlFor="adminCheck" className="text-sm text-gray-600">Login as Admin (Test mode)</label>
