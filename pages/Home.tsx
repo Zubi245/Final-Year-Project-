@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { getSpots } from '../mockService';
+import { getSpots } from '../apiService';
 import { Spot } from '../types';
 
 export const Home = () => {

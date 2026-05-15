@@ -5,7 +5,7 @@ import {
   InfoWindow,
 } from '@react-google-maps/api';
 import { MarkerClusterer } from '@googlemaps/markerclusterer';
-import { getSpots } from '../mockService';
+import { getSpots } from '../apiService';
 import { Spot } from '../types';
 import { OfflineMap } from './offlineMap';
 

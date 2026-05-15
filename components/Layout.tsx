@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Footer } from './Footer';
-import { getCurrentUser } from '../mockService';
+import { getCurrentUser } from '../apiService';
 
 const Logo = () => (
   <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-emerald-800 p-4 border-b border-gray-100">
@@ -37,6 +37,7 @@ const NavLink: React.FC<NavLinkProps> = ({ to, children, active, onClick, icon }
 
 export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const user = getCurrentUser();
@@ -44,7 +45,17 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   // Close mobile drawer on route change
   useEffect(() => {
     setIsMobileOpen(false);
+    setShowProfileMenu(false);
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
+    setShowProfileMenu(false);
+    navigate('/auth');
+  };
 
   const links = [
     { path: '/', label: 'Home', icon: '🏠' },
@@ -79,14 +90,54 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {/* User Profile Section in Sidebar */}
         <div className="p-4 border-t border-gray-100">
           {user ? (
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-bold truncate text-gray-800">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate capitalize">{user.role}</p>
-              </div>
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-50 w-full transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                  {(user.fullName || user.name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div className="flex-1 overflow-hidden text-left">
+                  <p className="text-sm font-bold truncate text-gray-800">{user.fullName || user.name || 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate capitalize">{user.role}</p>
+                </div>
+                <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Dropdown Menu */}
+              {showProfileMenu && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-lg border border-gray-200 py-2">
+                  <Link
+                    to="/profile"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <span>👤</span>
+                    <span>My Profile</span>
+                  </Link>
+                  {user.role === 'admin' && (
+                    <Link
+                      to="/admin"
+                      onClick={() => setShowProfileMenu(false)}
+                      className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                    >
+                      <span>⚙️</span>
+                      <span>Admin Panel</span>
+                    </Link>
+                  )}
+                  <hr className="my-2" />
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 w-full text-left"
+                  >
+                    <span>🚪</span>
+                    <span>Logout</span>
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <Link to="/auth" className="block w-full text-center py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 text-sm font-bold transition-colors">
@@ -148,9 +199,39 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                 ))}
               </nav>
               <div className="p-4 border-t">
-                <Link to="/auth" onClick={() => setIsMobileOpen(false)} className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium">
-                  {user ? 'My Profile' : 'Sign In'}
-                </Link>
+                {user ? (
+                  <div className="space-y-2">
+                    <Link 
+                      to="/profile" 
+                      onClick={() => setIsMobileOpen(false)} 
+                      className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium"
+                    >
+                      My Profile
+                    </Link>
+                    {user.role === 'admin' && (
+                      <Link 
+                        to="/admin" 
+                        onClick={() => setIsMobileOpen(false)} 
+                        className="block w-full text-center py-2 bg-purple-600 text-white rounded-lg font-medium"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => {
+                        setIsMobileOpen(false);
+                        handleLogout();
+                      }}
+                      className="block w-full text-center py-2 bg-red-600 text-white rounded-lg font-medium"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <Link to="/auth" onClick={() => setIsMobileOpen(false)} className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium">
+                    Sign In
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>

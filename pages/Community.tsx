@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getCommunityPosts, createPost } from '../mockService';
+import { getCommunityPosts, createPost } from '../apiService';
 import { Post } from '../types';
 
 export const Community = () => {

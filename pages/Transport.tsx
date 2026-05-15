@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { getCars } from '../mockService';
+import { getCars } from '../apiService';
 import { Car } from '../types';
 
 export const Transport = () => {
@@ -78,11 +78,11 @@ export const Transport = () => {
             className="bg-white rounded-xl shadow-sm border overflow-hidden hover:shadow-md transition-shadow group"
           >
             <div className="h-48 overflow-hidden">
-               <img src={car.imageUrl} alt={car.model} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+               <img src={car.imageUrl} alt={car.carModel} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
             </div>
             <div className="p-5">
               <div className="flex justify-between items-start mb-2">
-                <h3 className="text-xl font-bold text-gray-900">{car.model}</h3>
+                <h3 className="text-xl font-bold text-gray-900">{car.carModel}</h3>
                 <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">{car.type}</span>
               </div>
               <p className="text-gray-500 text-sm mb-4">Starting from <span className="text-black font-bold text-lg">PKR {car.pricePerDay.toLocaleString()}</span> / day</p>
@@ -115,7 +115,7 @@ export const Transport = () => {
               className="bg-white rounded-2xl max-w-md w-full p-6"
             >
               <h2 className="text-2xl font-bold mb-2">Confirm Rental</h2>
-              <p className="text-gray-600 mb-4">You are renting <strong>{selectedCar.model}</strong></p>
+              <p className="text-gray-600 mb-4">You are renting <strong>{selectedCar.carModel}</strong></p>
               
               <div className="space-y-4 mb-6">
                 <div>

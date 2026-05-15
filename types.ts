@@ -25,7 +25,7 @@ export interface Hotel {
 
 export interface Car {
   id: string;
-  model: string;
+  carModel: string;
   type: 'SUV' | 'Sedan' | '4x4' | 'Van';
   pricePerDay: number;
   imageUrl: string;

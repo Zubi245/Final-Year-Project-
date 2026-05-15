@@ -80,11 +80,11 @@ export const HOTELS: Hotel[] = [
 ];
 
 export const CARS: Car[] = [
-  { id: 'c1', model: 'Toyota Prado', type: '4x4', pricePerDay: 15000, imageUrl: 'https://picsum.photos/id/1070/400/300', features: ['AC', 'Off-road', '7 Seats'] },
-  { id: 'c2', model: 'Honda Civic', type: 'Sedan', pricePerDay: 8000, imageUrl: 'https://picsum.photos/id/1071/400/300', features: ['AC', 'Auto', 'Comfort'] },
-  { id: 'c3', model: 'Toyota HiAce', type: 'Van', pricePerDay: 12000, imageUrl: 'https://picsum.photos/id/1072/400/300', features: ['12 Seats', 'AC', 'Tour Group'] },
-  { id: 'c4', model: 'Suzuki Alto', type: 'Sedan', pricePerDay: 4000, imageUrl: 'https://picsum.photos/id/1073/400/300', features: ['Economy', 'City'] },
-  { id: 'c5', model: 'Toyota Fortuner', type: 'SUV', pricePerDay: 18000, imageUrl: 'https://picsum.photos/id/1074/400/300', features: ['Luxury', 'Off-road'] },
+  { id: 'c1', carModel: 'Toyota Prado', type: '4x4', pricePerDay: 15000, imageUrl: 'https://picsum.photos/id/1070/400/300', features: ['AC', 'Off-road', '7 Seats'] },
+  { id: 'c2', carModel: 'Honda Civic', type: 'Sedan', pricePerDay: 8000, imageUrl: 'https://picsum.photos/id/1071/400/300', features: ['AC', 'Auto', 'Comfort'] },
+  { id: 'c3', carModel: 'Toyota HiAce', type: 'Van', pricePerDay: 12000, imageUrl: 'https://picsum.photos/id/1072/400/300', features: ['12 Seats', 'AC', 'Tour Group'] },
+  { id: 'c4', carModel: 'Suzuki Alto', type: 'Sedan', pricePerDay: 4000, imageUrl: 'https://picsum.photos/id/1073/400/300', features: ['Economy', 'City'] },
+  { id: 'c5', carModel: 'Toyota Fortuner', type: 'SUV', pricePerDay: 18000, imageUrl: 'https://picsum.photos/id/1074/400/300', features: ['Luxury', 'Off-road'] },
 ];
 
 export const RECOMMENDATIONS_TEMPLATE = [

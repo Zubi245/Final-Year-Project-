@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { getSpots } from '../mockService';
+import { getSpot } from '../apiService';
 import { Spot } from '../types';
 
 interface Package {
@@ -31,17 +31,28 @@ export const Checkout = () => {
   ];
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const id = params.get('spotId');
-    if (id) {
-      getSpots().then(data => {
-        const found = data.find(s => s.id === id);
-        setSpot(found || null);
+    const fetchSpot = async () => {
+      const params = new URLSearchParams(location.search);
+      const id = params.get('spotId');
+      
+      if (!id) {
         setLoading(false);
-      });
-    } else {
-      setLoading(false);
-    }
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await getSpot(id);
+        setSpot(data);
+      } catch (err: any) {
+        console.error('Error fetching spot:', err);
+        setSpot(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchSpot();
   }, [location.search]);
 
   // Mock Base Price Calculator based on Region
@@ -87,8 +98,42 @@ export const Checkout = () => {
     });
   };
 
-  if (loading) return <div className="p-10 text-center">Loading booking details...</div>;
-  if (!spot) return <div className="p-10 text-center">Spot not found. Please return to Explore.</div>;
+  if (loading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading booking details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  if (!spot) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-center bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold mb-2 text-gray-800">Destination Not Found</h2>
+            <p className="text-gray-500 mb-6">The selected destination could not be loaded. Please try again.</p>
+            <button 
+              onClick={() => navigate('/explore')} 
+              className="px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-700 transition-colors"
+            >
+              Return to Explore
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const totalCost = calculateTotal();
   const selectedPkg = packages.find(p => p.id === selectedPackageId);
