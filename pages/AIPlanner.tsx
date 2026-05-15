@@ -1,129 +1,110 @@
-import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { askAIChat, getAIRecommendations } from '../mockService';
-import { Spot } from '../types';
+import { useNavigate } from 'react-router-dom';
 
 export const AIPlanner = () => {
-  const [tab, setTab] = useState<'chat' | 'plan'>('plan');
-  
-  // Chat State
-  const [messages, setMessages] = useState<{role: 'user'|'ai', text: string}[]>([
-    { role: 'ai', text: 'Hello! I am your AI guide for Pakistan. Ask me about weather, food, or specific spots.' }
-  ]);
-  const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
+  const navigate = useNavigate();
 
-  // Planner State
-  const [interests, setInterests] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [recommendations, setRecommendations] = useState<Spot[] | null>(null);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-    const userMsg = input;
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setIsTyping(true);
-    const response = await askAIChat(userMsg);
-    setIsTyping(false);
-    setMessages(prev => [...prev, { role: 'ai', text: response }]);
-  };
-
-  const handlePlan = async () => {
-    setIsGenerating(true);
-    const recs = await getAIRecommendations({
-      duration: 5,
-      budget: 'standard',
-      interests: interests.split(',').map(s => s.trim()),
-    });
-    setRecommendations(recs);
-    setIsGenerating(false);
-  };
+  const cards = [
+    {
+      title: 'Smart Itinerary Planner',
+      description: 'Plan your complete trip with AI-generated schedule, cost estimate, route guidance, and stay recommendations.',
+      icon: '🗺️',
+      gradient: 'from-emerald-500 to-teal-600',
+      route: '/planner/itinerary'
+    },
+    {
+      title: 'AI Travel Assistant',
+      description: 'Chat with AI to get instant travel guidance, destination suggestions, route help, and hotel recommendations.',
+      icon: '💬',
+      gradient: 'from-blue-500 to-indigo-600',
+      route: '/planner/chat'
+    }
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
-      <div className="flex justify-center mb-8">
-        <div className="bg-white p-1 rounded-lg border shadow-sm inline-flex">
-          <button 
-            onClick={() => setTab('plan')}
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${tab === 'plan' ? 'bg-emerald-100 text-emerald-800' : 'text-gray-500 hover:text-gray-900'}`}
-          >
-            Itinerary Planner
-          </button>
-          <button 
-            onClick={() => setTab('chat')}
-            className={`px-6 py-2 rounded-md text-sm font-medium transition-colors ${tab === 'chat' ? 'bg-emerald-100 text-emerald-800' : 'text-gray-500 hover:text-gray-900'}`}
-          >
-            AI Chat Assistant
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-12"
+        >
+          <h1 className="text-5xl font-extrabold text-gray-900 mb-4">
+            Ask AI Planner
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            Your intelligent travel companion for exploring Pakistan
+          </p>
+        </motion.div>
 
-      {tab === 'chat' ? (
-        <div className="bg-white rounded-xl shadow-lg border border-gray-200 h-[600px] flex flex-col">
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
-            {messages.map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 rounded-lg text-sm ${m.role === 'user' ? 'bg-emerald-600 text-white rounded-br-none' : 'bg-gray-100 text-gray-800 rounded-bl-none'}`}>
-                  {m.text}
+        {/* Cards */}
+        <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+          {cards.map((card, index) => (
+            <motion.div
+              key={index}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.2 }}
+              whileHover={{ scale: 1.02, y: -5 }}
+              className="relative group"
+            >
+              <div className="absolute inset-0 bg-gradient-to-r opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl blur-xl"
+                   style={{ background: `linear-gradient(to right, var(--tw-gradient-stops))` }} />
+              
+              <div className="relative bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 h-full">
+                {/* Gradient Header */}
+                <div className={`bg-gradient-to-r ${card.gradient} p-8 text-white`}>
+                  <div className="text-6xl mb-4">{card.icon}</div>
+                  <h2 className="text-2xl font-bold">{card.title}</h2>
+                </div>
+
+                {/* Content */}
+                <div className="p-8">
+                  <p className="text-gray-600 text-lg mb-8 leading-relaxed">
+                    {card.description}
+                  </p>
+
+                  <button
+                    onClick={() => navigate(card.route)}
+                    className={`w-full bg-gradient-to-r ${card.gradient} text-white font-bold py-4 px-6 rounded-xl hover:shadow-lg transform hover:scale-105 transition-all duration-200`}
+                  >
+                    {index === 0 ? 'Start Planning' : 'Start Chat'}
+                  </button>
                 </div>
               </div>
-            ))}
-            {isTyping && <div className="text-xs text-gray-400 animate-pulse">AI is typing...</div>}
-          </div>
-          <div className="p-4 border-t flex gap-2">
-            <input 
-              className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
-              placeholder="Ask about northern areas..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            />
-            <button onClick={handleSend} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700">Send</button>
-          </div>
-        </div>
-      ) : (
-        <div className="space-y-8">
-          <div className="bg-white p-8 rounded-xl shadow-sm border text-center">
-            <h2 className="text-2xl font-bold mb-4">Let AI build your perfect trip</h2>
-            <p className="text-gray-500 mb-6">Enter your interests (e.g., Hiking, History, Food, Lakes) and we'll suggest the best spots.</p>
-            <div className="flex max-w-md mx-auto gap-2">
-              <input 
-                className="flex-1 border rounded-lg px-4 py-2 focus:ring-2 focus:ring-emerald-500 outline-none"
-                placeholder="Hiking, Lakes, History..."
-                value={interests}
-                onChange={(e) => setInterests(e.target.value)}
-              />
-              <button 
-                onClick={handlePlan}
-                disabled={isGenerating}
-                className="bg-emerald-600 text-white px-6 py-2 rounded-lg hover:bg-emerald-700 disabled:opacity-50"
-              >
-                {isGenerating ? 'Thinking...' : 'Generate'}
-              </button>
-            </div>
-            <div className="mt-2 text-xs text-gray-400">Mock AI: Runs locally in browser</div>
-          </div>
-
-          {recommendations && (
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-4">
-              <h3 className="text-xl font-bold text-gray-800">Top Recommendations for You</h3>
-              {recommendations.map((spot, i) => (
-                <div key={i} className="bg-white p-4 rounded-lg shadow border flex gap-4 items-center">
-                  <img src={spot.imageUrl} className="w-24 h-24 rounded object-cover" alt={spot.name} />
-                  <div>
-                    <h4 className="font-bold text-lg">{spot.name}</h4>
-                    <p className="text-sm text-gray-600">{spot.description}</p>
-                    <div className="mt-2 text-xs bg-emerald-100 text-emerald-800 inline-block px-2 py-1 rounded">
-                      Match Score: {Math.round((spot as any).score * 10)}%
-                    </div>
-                  </div>
-                </div>
-              ))}
             </motion.div>
-          )}
+          ))}
         </div>
-      )}
+
+        {/* Features */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.6 }}
+          className="mt-16 text-center"
+        >
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+            {[
+              { icon: '💰', label: 'Budget Estimation' },
+              { icon: '🏨', label: 'Hotel Suggestions' },
+              { icon: '🛣️', label: 'Route Guidance' },
+              { icon: '📍', label: 'Tourist Spots' }
+            ].map((feature, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.8 + i * 0.1 }}
+                className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+              >
+                <div className="text-4xl mb-2">{feature.icon}</div>
+                <p className="text-sm font-medium text-gray-700">{feature.label}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
     </div>
   );
 };
