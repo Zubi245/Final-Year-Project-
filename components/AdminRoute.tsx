@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom';
+import { AdminLayout } from './AdminLayout';
 
 interface AdminRouteProps {
   children: React.ReactNode;
@@ -20,5 +21,5 @@ export function AdminRoute({ children }: AdminRouteProps) {
     return <Navigate to="/auth" replace />;
   }
   
-  return <>{children}</>;
+  return <AdminLayout>{children}</AdminLayout>;
 }

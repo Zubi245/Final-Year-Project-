@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { HOTELS } from '../data';
+import { getHotels } from '../apiService';
 import { Hotel } from '../types';
 
 export const Hotels = () => {
@@ -10,14 +10,27 @@ export const Hotels = () => {
   const [filtered, setFiltered] = useState<Hotel[]>([]);
   const [locationFilter, setLocationFilter] = useState('All');
   const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
+  const [loading, setLoading] = useState(true);
 
   const [checkInDate, setCheckInDate] = useState('');
   const [guests, setGuests] = useState(1);
 
   useEffect(() => {
-    setHotels(HOTELS);
-    setFiltered(HOTELS);
+    loadHotels();
   }, []);
+
+  const loadHotels = async () => {
+    setLoading(true);
+    try {
+      const data = await getHotels();
+      setHotels(data);
+      setFiltered(data);
+    } catch (error) {
+      console.error('Error loading hotels:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (locationFilter === 'All') setFiltered(hotels);
@@ -42,6 +55,16 @@ export const Hotels = () => {
       } 
     });
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -73,7 +96,7 @@ export const Hotels = () => {
                 onError={(e) => (e.currentTarget.src = 'https://via.placeholder.com/400x300?text=No+Image')}
               />
               <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-sm font-bold">
-                PKR {hotel.pricePerNight.toLocaleString()} / night
+                PKR {hotel.pricePerNight?.toLocaleString() || 0} / night
               </div>
             </div>
             <div className="p-5">
@@ -83,7 +106,7 @@ export const Hotels = () => {
               </div>
               <p className="text-emerald-600 text-sm mb-3">📍 {hotel.location}</p>
               <div className="flex flex-wrap gap-2 mb-4">
-                {hotel.amenities.map(a => (
+                {hotel.amenities?.map(a => (
                   <span key={a} className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">{a}</span>
                 ))}
               </div>
@@ -97,6 +120,12 @@ export const Hotels = () => {
           </motion.div>
         ))}
       </div>
+
+      {filtered.length === 0 && !loading && (
+        <div className="text-center py-20 text-gray-500">
+          No hotels found.
+        </div>
+      )}
 
       {/* Booking Modal */}
       <AnimatePresence>
@@ -135,11 +164,11 @@ export const Hotels = () => {
                 <div className="bg-gray-50 p-3 rounded text-sm">
                   <div className="flex justify-between mb-1">
                     <span>Price per night</span>
-                    <span>PKR {selectedHotel.pricePerNight.toLocaleString()}</span>
+                    <span>PKR {selectedHotel.pricePerNight?.toLocaleString() || 0}</span>
                   </div>
                   <div className="flex justify-between font-bold border-t pt-1 mt-1">
                     <span>Total (Est. 1 Night)</span>
-                    <span>PKR {selectedHotel.pricePerNight.toLocaleString()}</span>
+                    <span>PKR {selectedHotel.pricePerNight?.toLocaleString() || 0}</span>
                   </div>
                 </div>
               </div>

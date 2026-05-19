@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { chatWithTripWise } from '../apiService';
 
 interface Message {
   role: 'user' | 'ai';
@@ -107,7 +108,7 @@ export const AIChat = () => {
     return `I'd be happy to help you with that! 😊\n\nI can provide detailed information about:\n\n🗺️ **Trip Planning**\n• Custom itineraries\n• Budget estimates\n• Best routes\n\n🏨 **Accommodations**\n• Hotel recommendations\n• Budget to luxury options\n• Booking tips\n\n📍 **Destinations**\n• Hunza Valley\n• Skardu\n• Swat Valley\n• Murree\n• Naran Kaghan\n• And many more!\n\n🌤️ **Travel Info**\n• Best time to visit\n• Weather conditions\n• What to pack\n\nCould you please be more specific about what you'd like to know? For example:\n• "Plan a 5-day trip to Hunza"\n• "Best hotels in Skardu"\n• "Route from Lahore to Swat"\n• "When to visit Murree"`;
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
 
     const userMessage: Message = {
@@ -116,20 +117,32 @@ export const AIChat = () => {
       timestamp: new Date()
     };
 
+    const userInput = input; // Save input before clearing
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsTyping(true);
 
-    // Simulate AI thinking time
-    setTimeout(() => {
+    try {
+      // Call real AI API
+      const aiReply = await chatWithTripWise(userInput);
+      
       const aiResponse: Message = {
         role: 'ai',
-        text: generateAIResponse(input),
+        text: aiReply,
         timestamp: new Date()
       };
       setMessages(prev => [...prev, aiResponse]);
+    } catch (error: any) {
+      // Error handling
+      const errorMessage: Message = {
+        role: 'ai',
+        text: `Sorry, I encountered an error: ${error.message || 'Please try again later.'}`,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
+    }
   };
 
   const handleQuickAction = (query: string) => {

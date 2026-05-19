@@ -39,32 +39,83 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const user = getCurrentUser();
+  
+  // Get user from real backend auth (not mock service)
+  const getUserFromAuth = () => {
+    const userStr = localStorage.getItem('user');
+    if (!userStr) return null;
+    try {
+      return JSON.parse(userStr);
+    } catch {
+      return null;
+    }
+  };
+  
+  const user = getUserFromAuth();
+
+  // Check if current page is an auth page (no sidebar/footer needed)
+  const authPages = [
+    '/auth',
+    '/auth-old',
+    '/auth/callback',
+    '/auth-unified',
+    '/complete-profile',
+    '/verify-email',
+    '/forgot-password',
+    '/reset-password'
+  ];
+  
+  const isAuthPage = authPages.includes(location.pathname);
+
+  // If it's an auth page, render without Layout
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
 
   // Close mobile drawer on route change
   useEffect(() => {
     setIsMobileOpen(false);
   }, [location.pathname]);
 
-  const links = [
+  // Public links - always visible
+  const publicLinks = [
     { path: '/', label: 'Home', icon: '🏠' },
     { path: '/explore', label: 'Explore', icon: '🔭' },
     { path: '/map', label: 'Map', icon: '🗺️' },
     { path: '/hotels', label: 'Hotels', icon: '🏨' },
     { path: '/transport', label: 'Transport', icon: '🚗' },
+  ];
+
+  // Protected links - only visible when logged in
+  const protectedLinks = [
     { path: '/ai-planner', label: 'AI Planner', icon: '🤖' },
     { path: '/alerts', label: 'Price Alerts', icon: '🔔' },
     { path: '/community', label: 'Community', icon: '👥' },
-    { path: '/admin', label: 'Admin Panel', icon: '⚙️' },
   ];
+
+  // Admin link - only visible for admin users
+  const adminLink = { path: '/admin', label: 'Admin Panel', icon: '⚙️' };
+
+  // Build navigation links based on user status
+  let navigationLinks = [...publicLinks];
+  
+  if (user) {
+    // Add protected links if user is logged in
+    navigationLinks = [...navigationLinks, ...protectedLinks];
+    
+    // Add admin link if user is admin
+    if (user.role === 'admin') {
+      navigationLinks = [...navigationLinks, adminLink];
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans flex">
       {/* Desktop Sidebar */}
-      <aside className=" md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 z-30">
+      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 z-30">
         <Logo />
         <nav className="flex-1 overflow-y-auto py-4 space-y-1 scrollbar-thin">
-          {links.map(l => (
+          {navigationLinks.map(l => (
             <NavLink
               key={l.path}
               to={l.path}
@@ -79,17 +130,38 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
         {/* User Profile Section in Sidebar */}
         <div className="p-4 border-t border-gray-100">
           {user ? (
-            <div className="flex items-center gap-3 px-2">
-              <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-bold truncate text-gray-800">{user.name}</p>
-                <p className="text-xs text-gray-500 truncate capitalize">{user.role}</p>
-              </div>
+            <div className="space-y-2">
+              <Link 
+                to="/profile" 
+                className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-emerald-50 transition-colors"
+              >
+                <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+                  {user.name?.charAt(0).toUpperCase() || user.fullName?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="text-sm font-bold truncate text-gray-800">{user.name || user.fullName || 'User'}</p>
+                  <p className="text-xs text-gray-500 truncate capitalize">{user.role || 'user'}</p>
+                </div>
+              </Link>
+              <button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate('/auth');
+                  window.location.reload();
+                }}
+                className="w-full px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Sign Out
+              </button>
             </div>
           ) : (
-            <Link to="/auth" className="block w-full text-center py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 text-sm font-bold transition-colors">
+            <Link 
+              to="/auth" 
+              className="block w-full text-center py-2 border border-emerald-600 text-emerald-600 rounded-lg hover:bg-emerald-50 text-sm font-bold transition-colors"
+            >
               Sign In / Join
             </Link>
           )}
@@ -135,7 +207,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
             >
               <Logo />
               <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
-                {links.map(l => (
+                {navigationLinks.map(l => (
                   <NavLink
                     key={l.path}
                     to={l.path}
@@ -147,10 +219,37 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
                   </NavLink>
                 ))}
               </nav>
-              <div className="p-4 border-t">
-                <Link to="/auth" onClick={() => setIsMobileOpen(false)} className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium">
-                  {user ? 'My Profile' : 'Sign In'}
-                </Link>
+              <div className="p-4 border-t space-y-2">
+                {user ? (
+                  <>
+                    <Link 
+                      to="/profile" 
+                      onClick={() => setIsMobileOpen(false)} 
+                      className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium"
+                    >
+                      My Profile
+                    </Link>
+                    <button
+                      onClick={() => {
+                        localStorage.clear();
+                        setIsMobileOpen(false);
+                        navigate('/auth');
+                        window.location.reload();
+                      }}
+                      className="w-full py-2 text-red-600 border border-red-300 rounded-lg font-medium hover:bg-red-50"
+                    >
+                      Sign Out
+                    </button>
+                  </>
+                ) : (
+                  <Link 
+                    to="/auth" 
+                    onClick={() => setIsMobileOpen(false)} 
+                    className="block w-full text-center py-2 bg-emerald-600 text-white rounded-lg font-medium"
+                  >
+                    Sign In
+                  </Link>
+                )}
               </div>
             </motion.div>
           </>

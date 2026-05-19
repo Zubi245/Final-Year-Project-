@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { INITIAL_SPOTS } from '../data';
+import { getSpots } from '../apiService';
 import { Spot } from '../types';
 
 export const Explore = () => {
@@ -9,18 +9,31 @@ export const Explore = () => {
   const [filtered, setFiltered] = useState<Spot[]>([]);
   const [search, setSearch] = useState('');
   const [region, setRegion] = useState('All');
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    setSpots(INITIAL_SPOTS);
-    setFiltered(INITIAL_SPOTS);
+    loadSpots();
   }, []);
+
+  const loadSpots = async () => {
+    setLoading(true);
+    try {
+      const data = await getSpots();
+      setSpots(data);
+      setFiltered(data);
+    } catch (error) {
+      console.error('Error loading spots:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     let res = spots;
     if (search) {
       const lowerSearch = search.toLowerCase();
-      res = res.filter(s => s.name.toLowerCase().includes(lowerSearch) || s.tags.some(t => t.toLowerCase().includes(lowerSearch)));
+      res = res.filter(s => s.name.toLowerCase().includes(lowerSearch) || s.tags?.some(t => t.toLowerCase().includes(lowerSearch)));
     }
     if (region !== 'All') {
       res = res.filter(s => s.region === region);
@@ -33,6 +46,16 @@ export const Explore = () => {
   };
 
   const regions = Array.from(new Set(spots.map(s => s.region)));
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -86,7 +109,7 @@ export const Explore = () => {
               </div>
               <p className="text-sm text-gray-600 line-clamp-2 mb-4 flex-grow">{spot.description}</p>
               <div className="flex flex-wrap gap-1 mb-4">
-                {spot.tags.slice(0, 3).map(t => (
+                {spot.tags?.slice(0, 3).map(t => (
                   <span key={t} className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full">{t}</span>
                 ))}
               </div>
@@ -101,7 +124,7 @@ export const Explore = () => {
         ))}
       </div>
 
-      {filtered.length === 0 && (
+      {filtered.length === 0 && !loading && (
         <div className="text-center py-20 text-gray-500">
           No places found matching your criteria.
         </div>

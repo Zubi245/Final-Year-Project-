@@ -4,13 +4,41 @@ import { Link } from 'react-router-dom';
 export const Footer = () => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if(email) {
+    
+    if (!email) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/newsletter/subscribe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
         setSubscribed(true);
-        setTimeout(() => setSubscribed(false), 3000);
         setEmail('');
+        setTimeout(() => setSubscribed(false), 5000);
+      } else {
+        setError(data.message || 'Subscription failed');
+        setTimeout(() => setError(''), 5000);
+      }
+    } catch (err) {
+      setError('Network error. Please try again.');
+      setTimeout(() => setError(''), 5000);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,13 +97,27 @@ export const Footer = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
             <button 
                 type="submit"
-                className={`px-4 py-2 rounded font-bold transition-colors ${subscribed ? 'bg-green-600 text-white' : 'bg-emerald-600 hover:bg-emerald-500 text-white'}`}
+                disabled={loading || subscribed}
+                className={`px-4 py-2 rounded font-bold transition-colors ${
+                  subscribed 
+                    ? 'bg-green-600 text-white' 
+                    : loading 
+                    ? 'bg-gray-600 text-white cursor-not-allowed'
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                }`}
             >
-                {subscribed ? 'Subscribed!' : 'Subscribe'}
+                {loading ? 'Subscribing...' : subscribed ? '✓ Subscribed!' : 'Subscribe'}
             </button>
+            {error && (
+              <p className="text-xs text-red-400 mt-1">{error}</p>
+            )}
+            {subscribed && (
+              <p className="text-xs text-green-400 mt-1">Check your email for confirmation!</p>
+            )}
           </form>
         </div>
       </div>

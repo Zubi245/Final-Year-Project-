@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { getCars } from '../mockService';
+import { getCars } from '../apiService';
 import { Car } from '../types';
 
 export const Transport = () => {
@@ -10,17 +10,28 @@ export const Transport = () => {
   const [filtered, setFiltered] = useState<Car[]>([]);
   const [typeFilter, setTypeFilter] = useState('All');
   const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Rental Form State
   const [rentalDays, setRentalDays] = useState(1);
   const [pickupDate, setPickupDate] = useState('');
 
   useEffect(() => {
-    getCars().then(data => {
+    loadCars();
+  }, []);
+
+  const loadCars = async () => {
+    setLoading(true);
+    try {
+      const data = await getCars();
       setCars(data);
       setFiltered(data);
-    });
-  }, []);
+    } catch (error) {
+      console.error('Error loading cars:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (typeFilter === 'All') {
@@ -39,7 +50,7 @@ export const Transport = () => {
         return;
     }
 
-    const totalCost = selectedCar.pricePerDay * rentalDays;
+    const totalCost = (selectedCar.pricePerDay || 0) * rentalDays;
 
     navigate('/payment', { 
         state: { 
@@ -53,6 +64,16 @@ export const Transport = () => {
         }
     });
   };
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
@@ -85,9 +106,9 @@ export const Transport = () => {
                 <h3 className="text-xl font-bold text-gray-900">{car.model}</h3>
                 <span className="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-1 rounded">{car.type}</span>
               </div>
-              <p className="text-gray-500 text-sm mb-4">Starting from <span className="text-black font-bold text-lg">PKR {car.pricePerDay.toLocaleString()}</span> / day</p>
+              <p className="text-gray-500 text-sm mb-4">Starting from <span className="text-black font-bold text-lg">PKR {(car.pricePerDay || 0).toLocaleString()}</span> / day</p>
               <ul className="text-sm text-gray-600 mb-4 space-y-1">
-                {car.features.map(f => (
+                {car.features?.map(f => (
                   <li key={f} className="flex items-center gap-2">
                     <span className="text-emerald-500">✓</span> {f}
                   </li>
@@ -103,6 +124,12 @@ export const Transport = () => {
           </motion.div>
         ))}
       </div>
+
+      {filtered.length === 0 && !loading && (
+        <div className="text-center py-20 text-gray-500">
+          No vehicles found.
+        </div>
+      )}
 
        {/* Rental Modal */}
        <AnimatePresence>
@@ -141,11 +168,11 @@ export const Transport = () => {
                 <div className="bg-gray-50 p-3 rounded text-sm">
                   <div className="flex justify-between mb-1">
                     <span>Price per day</span>
-                    <span>PKR {selectedCar.pricePerDay.toLocaleString()}</span>
+                    <span>PKR {(selectedCar.pricePerDay || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between font-bold border-t pt-1 mt-1">
                     <span>Total (Est.)</span>
-                    <span>PKR {(selectedCar.pricePerDay * rentalDays).toLocaleString()}</span>
+                    <span>PKR {((selectedCar.pricePerDay || 0) * rentalDays).toLocaleString()}</span>
                   </div>
                 </div>
               </div>
