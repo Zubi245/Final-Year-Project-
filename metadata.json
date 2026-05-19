@@ -1,0 +1,8 @@
+{
+  "name": "Copy of Trip Wise Pakistan",
+  "description": "A comprehensive, AI-powered travel companion for exploring Pakistan. Features offline support, community feeds, and smart itinerary planning.",
+  "requestFramePermissions": [
+    "geolocation",
+    "camera"
+  ]
+}
